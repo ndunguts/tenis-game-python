@@ -98,13 +98,10 @@ class ball:
 class Game:
     def __init__(self):
         pygame.init()
-        
         self.area = pygame.display.set_mode((500, 600))
-        
         self.change_p = sideP()
         self.change_r = sidePR()
         self.reset_game()
-        
         self.running = True
 
     def reset_game(self):
@@ -113,17 +110,19 @@ class Game:
         self.change_r.yp = 0
         self.ball = ball(self.area, self.change_p, self.change_r)
         self.ball.draw()
+        self.start_time = time.time()
+        self.elapsed_time = 0
 
     def run(self):
         WHITE = (255, 255, 255)
         BLACK = (0, 0, 0)
 
-        font = pygame.font.SysFont(None, 48)  # None means default font, 48 is the font size
-        text = font.render('Game Over', True, BLACK)  # True for anti-aliasing
+        font = pygame.font.SysFont(None, 48)
+        text = font.render('Game Over', True, BLACK)
         button_font = pygame.font.SysFont(None, 36)
         restart_text = button_font.render('Restart', True, BLACK)
         button_rect = pygame.Rect(200, 300, 100, 50)
-
+        
         while self.running:
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
@@ -145,18 +144,35 @@ class Game:
                     self.running = False
             
             if not self.ball.game_running:
+                if self.elapsed_time == 0:
+                    self.elapsed_time = self.show_time(self.start_time, False)
                 self.area.fill(WHITE)
                 self.area.blit(text, (150, 200))
                 pygame.draw.rect(self.area, (200, 200, 200), button_rect)
                 self.area.blit(restart_text, (210, 310))
+                time_text = self.render_time(self.elapsed_time, BLACK)
+                self.area.blit(time_text, (10, 10))
                 pygame.display.flip()
             else:
                 self.ball.move()
+                self.elapsed_time = self.show_time(self.start_time, True)
+                time_text = self.render_time(self.elapsed_time, (255, 255, 255))
+                self.area.blit(time_text, (10, 10))
+                pygame.display.flip()
                 time.sleep(0.1)
+
+    def show_time(self, start_time, running):
+        elapsed_time = 0
+        if running:
+            elapsed_time = time.time() - start_time
+        return elapsed_time
+
+    def render_time(self, elapsed_time, color):
+        font = pygame.font.SysFont(None, 36)
+        return font.render(f'amanota: {int(elapsed_time)}point', True, color)
 
 if __name__ == '__main__':
     game = Game()
     game.run()
     pygame.quit()
     sys.exit()
-e
